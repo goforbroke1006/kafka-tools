@@ -2,6 +2,11 @@
 
 Scripts for kafka. Bash wrappers over [kafkacat](https://github.com/edenhill/kcat).
 
+### Requirements
+
+* Ubuntu
+* Python 3
+
 ### Installation
 
 ```shell
