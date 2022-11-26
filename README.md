@@ -14,12 +14,12 @@ Analyze topic with Kowalski:
 
 ```shell
 # without topics list (all topics analyze)
-python3 kafka_kowalski.py -b localhost:9092
+kafwalski
 ```
 
 ```shell
 # or specify topics
-python3 kafka_kowalski.py -b localhost:9092 -t payment.tx -t user.data
+kafwalski -b localhost:9092 -t payment.tx -t user.data
 ```
 
 Kowalski's result:
