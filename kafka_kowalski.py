@@ -5,7 +5,8 @@ import uuid
 from kafka import KafkaConsumer, TopicPartition
 from kafka.consumer.fetcher import ConsumerRecord
 
-if __name__ == '__main__':
+
+def main():
     parser = argparse.ArgumentParser(prog='kafka-kowalski')
     parser.add_argument('-b', dest="bootstrap_servers", default='localhost:9092')
     parser.add_argument('-t', dest="topics", action='append', nargs=1, help='help:')
@@ -29,7 +30,9 @@ if __name__ == '__main__':
         consumer.assign([tp])
 
         d = datetime.today() - timedelta(hours=1, minutes=0)
-        offset_from = consumer.offsets_for_times({tp: d.timestamp() * 1000})[tp].offset
+        offset_from = consumer.offsets_for_times({tp: d.timestamp() * 1000})[tp].offset \
+            if consumer.offsets_for_times({tp: d.timestamp() * 1000})[tp] is not None \
+            else 0
         offset_till = consumer.offsets_for_times({tp: datetime.today().timestamp() * 1000})[tp].offset \
             if consumer.offsets_for_times({tp: datetime.today().timestamp() * 1000})[tp] is not None \
             else consumer.end_offsets([tp])[tp]
@@ -57,3 +60,7 @@ if __name__ == '__main__':
         msg_per_sec = float(samples) / time_range
         bytes_per_sec = sum(byte_sizes) / time_range
         print(topic_name, dt_from, dt_till, msg_per_sec, "msg/s", bytes_per_sec, "byte/s")
+
+
+if __name__ == '__main__':
+    main()
