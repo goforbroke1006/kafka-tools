@@ -25,8 +25,11 @@ kafwalski -b localhost:9092 -t payment.tx -t user.data
 Kowalski's result:
 
 ```text
-payment.tx 2022-11-26 01:29:14 2022-11-26 01:47:29 7.307811411881565 msg/s 425.68001474210115 byte/s
-user.data 2022-11-26 01:29:14 2022-11-26 01:47:29 3.654082614727265 msg/s 184.53117204372688 byte/s
+<topic 1> <first msg time> <last msg time> <avg msg per second> msg/s <avg bytes per second> byte/s
+<topic 2> <first msg time> <last msg time> <avg msg per second> msg/s <avg bytes per second> byte/s
+...
+<topic N> <first msg time> <last msg time> <avg msg per second> msg/s <avg bytes per second> byte/s
+
 ```
 
 Messages count per second:
