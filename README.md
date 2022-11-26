@@ -1,6 +1,8 @@
 # kafka-tools
 
-Scripts for kafka. Bash wrappers over [kafkacat](https://github.com/edenhill/kcat).
+Scripts for kafka.
+* Bash wrappers over [kafkacat](https://github.com/edenhill/kcat).
+* Python-based script.
 
 ### Requirements
 
