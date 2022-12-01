@@ -14,7 +14,7 @@ def main():
     args = parser.parse_args()
 
     consumer = KafkaConsumer(
-        bootstrap_servers=args.bootstrap_servers,
+        bootstrap_servers=args.bootstrap_servers.split(";"),
         group_id=str(uuid.uuid4()),
     )
 

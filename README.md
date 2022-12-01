@@ -12,6 +12,7 @@ Scripts for kafka.
 ### Installation
 
 ```shell
+pip uninstall -y gfb-kafka-tools
 pip install git+https://github.com/goforbroke1006/kafka-tools.git
 ```
 
