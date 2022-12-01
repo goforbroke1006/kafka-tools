@@ -49,9 +49,11 @@ def main():
         if args.verbose is not None:
             print(f'Check offsets {offset_from} .. {offset_till}')
 
+        total_samples_count = offset_till - 1 - offset_from
+
         for m in consumer:
             samples += 1
-            printProgressBar(samples, offset_till - 1, offset_from)
+            printProgressBar(samples, total_samples_count, length=50)
 
             message = m  # type: ConsumerRecord
             timestamps.append(int(message.timestamp) / 1000)
