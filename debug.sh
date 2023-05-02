@@ -22,3 +22,6 @@ for ((i = 0; i < 1000; i++)); do
   debug_produce_user_data '{"user": 1235, "last_name": "Ivanov"}'
   debug_produce_payment '{"user": 1238, "operation": "withdraw", "amount": 6537.94}'
 done
+
+
+echo '{"xxxxxxxxxxxxx": "7aef25f8-94e4-431b-879b-b8ff2dcd8107", "yyy": "", "zzz": "", "uuu": ""}' | kafkacat -b localhost:49092 -P -t topic_1
