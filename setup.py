@@ -2,7 +2,7 @@ from distutils.core import setup
 import setuptools
 
 setup(name='gfb-kafka-tools',
-      version='1.0.0',
+      version='1.0.4',
       description='GFB Kafka Tools',
       author='GFB',
       author_email='go.for.broke1006@gmail.com',
