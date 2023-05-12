@@ -1,31 +1,66 @@
 import argparse
+import ssl
 from datetime import datetime
 
 from kafka import KafkaConsumer, TopicPartition
 from kafka.consumer.fetcher import ConsumerRecord
 
+KAFKA_GROUP_ID_DEFAULT = 'kafwalski'
+
+SECURITY_PROTOCOL_PLAINTEXT = 'PLAINTEXT'
+SECURITY_PROTOCOL_SSL = 'SSL'
+
 
 def main():
     parser = argparse.ArgumentParser(prog='kafka-kowalski')
-    parser.add_argument('-b', dest="bootstrap_servers", default=None, help='server1:9092;server2:9092')
+    parser.add_argument('-b', dest="bootstrap_servers", default=None, help='server1:9092,server2:9092')
     parser.add_argument('-t', dest="topics", action='append', nargs=1, help='topic name (multiple allowed)')
-    parser.add_argument('--verbose', action=argparse.BooleanOptionalAction)
+    parser.add_argument('--ssl-certificate', dest="ssl_certificate", default=None, help='certificate filepath')
+    parser.add_argument('--ssl-private-key', dest="ssl_private_key", default=None, help='private key filepath')
+    parser.add_argument('--verbose', dest="verbose", action=argparse.BooleanOptionalAction)
     args = parser.parse_args()
 
     topics_list = args.topics
 
+    brokers_list = args.bootstrap_servers.split(",")
+
+    security_protocol = SECURITY_PROTOCOL_PLAINTEXT
+    ssl_context = None
+
+    if args.ssl_certificate is not None and args.ssl_private_key is not None:
+        security_protocol = SECURITY_PROTOCOL_SSL
+
+        ssl_context = ssl.create_default_context()
+        ssl_context.load_cert_chain(certfile=args.ssl_certificate, keyfile=args.ssl_private_key)
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
     if topics_list is None or len(topics_list) == 0:
-        consumer = KafkaConsumer(bootstrap_servers=args.bootstrap_servers.split(";"))
+        consumer = KafkaConsumer(
+            bootstrap_servers=brokers_list,
+            security_protocol=security_protocol,
+            ssl_context=ssl_context,
+        )
         topics_list = consumer.topics()
         topics_list = [tn for tn in topics_list if not len(tn) == 1]
         consumer.close()
     else:
         topics_list = [tt[0] for tt in topics_list]
 
+    print('{:<36} {:>10} {:>19} {:<20} {:<20} {:>12} {:>12} msg/s {:>12} bytes/s'.format(
+        'topic', 'partition', 'offset',
+        'dt_from', 'dt_till',
+        'samples',
+        '<count>',
+        '<bytes>',
+    ))
+
     for topic_name in topics_list:
         consumer = KafkaConsumer(
-            bootstrap_servers=args.bootstrap_servers.split(";"),
-            group_id="kafwalski",
+            bootstrap_servers=brokers_list,
+            group_id=KAFKA_GROUP_ID_DEFAULT,
+            security_protocol=security_protocol,
+            ssl_context=ssl_context,
         )
         partitions = consumer.partitions_for_topic(topic_name)
 
@@ -45,7 +80,8 @@ def main():
             timestamps = []
             byte_sizes = []
 
-            for cr in poll_res[tp]:  # type: ConsumerRecord
+            partition_messages = poll_res[tp]
+            for cr in partition_messages:  # type: ConsumerRecord
                 samples += 1
                 timestamps.append(int(cr.timestamp / 1000))
                 byte_sizes.append(len(cr.value))
@@ -58,10 +94,17 @@ def main():
 
             offset = offsets_res[tp]
 
-            print(
-                f"{tp.topic} {tp.partition} {offset} "
-                f"{dt_from} {dt_till} "
-                f"{samples} {round_float(msg_per_sec, 4)} msg/s {round_float(bytes_per_sec, 4)} bytes/s")
+            print('{:<36} {:>10} {:>19} {:<20} {:<20} {:>12} {:>12} msg/s {:>12} bytes/s'.format(
+                    tp.topic, tp.partition, offset,
+                    dt_from, dt_till,
+                    samples,
+                    round_float(msg_per_sec, 4),
+                    round_float(bytes_per_sec, 4),
+            ))
+
+            if args.verbose:
+                last_message = partition_messages[len(partition_messages) - 1]
+                print(last_message.value.decode('utf-8'))
 
         consumer.close()
 
